@@ -148,7 +148,7 @@ class DiT(nn.Module):
     """
     def __init__(
         self,
-        input_size=32,
+        input_size=4,
         patch_size=2,
         in_channels=4,
         hidden_size=1152,
@@ -156,7 +156,7 @@ class DiT(nn.Module):
         num_heads=16,
         mlp_ratio=4.0,
         class_dropout_prob=0.1,
-        num_classes=1000,
+        num_classes=10,
         learn_sigma=True,
     ):
         super().__init__()
@@ -239,6 +239,7 @@ class DiT(nn.Module):
         """
         x = self.x_embedder(x) + self.pos_embed  # (N, T, D), where T = H * W / patch_size ** 2
         t = self.t_embedder(t)                   # (N, D)
+        #print(y)
         y = self.y_embedder(y, self.training)    # (N, D)
         c = t + y                                # (N, D)
         for block in self.blocks:
@@ -254,6 +255,7 @@ class DiT(nn.Module):
         # https://github.com/openai/glide-text2im/blob/main/notebooks/text2im.ipynb
         half = x[: len(x) // 2]
         combined = torch.cat([half, half], dim=0)
+        #print(combined.shape)
         model_out = self.forward(combined, t, y)
         # For exact reproducibility reasons, we apply classifier-free guidance on only
         # three channels by default. The standard approach to cfg applies it to all channels.
@@ -353,7 +355,7 @@ def DiT_B_8(**kwargs):
     return DiT(depth=12, hidden_size=768, patch_size=8, num_heads=12, **kwargs)
 
 def DiT_S_2(**kwargs):
-    return DiT(depth=12, hidden_size=384, patch_size=2, num_heads=6, **kwargs)
+    return DiT(depth=4, hidden_size=192, patch_size=2, num_heads=6, **kwargs)
 
 def DiT_S_4(**kwargs):
     return DiT(depth=12, hidden_size=384, patch_size=4, num_heads=6, **kwargs)
